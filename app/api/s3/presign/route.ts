@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     });
 
     const url = await getSignedUrl(s3Client, command, { expiresIn: 60 * 5 });
-    return NextResponse.json({ url });
+    return NextResponse.json({ url, key });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message || "Unexpected error" }, { status: 500 });
   }

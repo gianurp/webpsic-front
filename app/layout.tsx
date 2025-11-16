@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "./components/Header";
-import ScrollHandler from "./components/ScrollHandler";
-import FloatingButtons from "./components/FloatingButtons";
-import CalmWaves from "./components/CalmWaves";
-import CalmBackdrop from "./components/CalmBackdrop";
-import RouteTransition from "./components/RouteTransition";
+import ConditionalLayout from "./components/ConditionalLayout";
 import Providers from "./providers";
 
 const geistSans = Geist({
@@ -36,16 +31,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          <Header />
-          <ScrollHandler />
-          <CalmBackdrop />
-          <main className="pt-20 relative z-10">
-            <RouteTransition>
-              {children}
-            </RouteTransition>
-          </main>
-          <CalmWaves />
-          <FloatingButtons />
+          <ConditionalLayout>
+            {children}
+          </ConditionalLayout>
         </Providers>
       </body>
     </html>

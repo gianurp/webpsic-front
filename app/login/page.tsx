@@ -136,6 +136,15 @@ export default function Login() {
               </button>
             </form>
 
+            <div className="mt-4 text-center">
+              <Link
+                href="/syscreju/login"
+                className="text-sm text-[#4a9a8a] hover:text-[#2d2d2d] transition-colors font-medium"
+              >
+                ¿Eres administrador? Accede al sistema aquí
+              </Link>
+            </div>
+
             <div className="mt-6 text-center">
               <p className="text-[#555]">
                 ¿No tienes una cuenta?{' '}
