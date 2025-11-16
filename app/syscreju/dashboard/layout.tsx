@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -39,7 +39,7 @@ export default function SysCrejuDashboardLayout({ children }: DashboardLayoutPro
     }
   }, [router]);
 
-  const loadAvatar = async (photoKey: string) => {
+  const loadAvatar = useCallback(async (photoKey: string) => {
     try {
       const res = await fetch("/api/s3/presign-get", {
         method: "POST",
@@ -53,7 +53,44 @@ export default function SysCrejuDashboardLayout({ children }: DashboardLayoutPro
     } catch (error) {
       console.error("Error loading avatar:", error);
     }
-  };
+  }, []);
+
+  // Escuchar evento de actualización de perfil
+  useEffect(() => {
+    const handleProfileUpdate = async (event: CustomEvent) => {
+      const updatedUser = event.detail?.user;
+      if (updatedUser) {
+        setUser(updatedUser);
+        // Actualizar avatar si hay photoKey
+        if (updatedUser.photoKey) {
+          await loadAvatar(updatedUser.photoKey);
+        } else {
+          setAvatarUrl(null);
+        }
+      } else {
+        // Si no viene en el evento, recargar desde localStorage
+        const storedUser = localStorage.getItem("syscreju_user");
+        if (storedUser) {
+          try {
+            const userData = JSON.parse(storedUser);
+            setUser(userData);
+            if (userData.photoKey) {
+              await loadAvatar(userData.photoKey);
+            } else {
+              setAvatarUrl(null);
+            }
+          } catch (error) {
+            console.error("Error parsing user data:", error);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("syscreju-profile-updated", handleProfileUpdate as EventListener);
+    return () => {
+      window.removeEventListener("syscreju-profile-updated", handleProfileUpdate as EventListener);
+    };
+  }, [loadAvatar]);
 
   const handleLogout = () => {
     localStorage.removeItem("syscreju_user");
@@ -113,6 +150,15 @@ export default function SysCrejuDashboardLayout({ children }: DashboardLayoutPro
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      ),
+    },
+    {
+      href: '/syscreju/dashboard/perfil',
+      label: 'Mi Perfil',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
       ),
     },
