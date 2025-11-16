@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from "react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 
 type Props = {
@@ -10,34 +10,108 @@ type Props = {
 };
 
 export default function UserMenu({ name, photoKey }: Props) {
+  const { data: session, update } = useSession();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(name ?? null);
+  const [currentPhotoKey, setCurrentPhotoKey] = useState<string | null>(photoKey ?? (session as any)?.photoKey ?? null);
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
+  // Función para cargar la foto de perfil
+  const loadAvatar = async (key: string | null) => {
+    if (!key) {
+      setAvatarUrl(null);
+      return;
+    }
+    try {
+      const res = await fetch("/api/s3/presign-get", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.url) {
+          setAvatarUrl(data.url);
+        } else {
+          setAvatarUrl(null);
+        }
+      } else {
+        setAvatarUrl(null);
+      }
+    } catch (error) {
+      console.error("Error loading avatar:", error);
+      setAvatarUrl(null);
+    }
+  };
+
+  // Cargar datos del usuario y avatar al montar o cuando cambie la sesión
   useEffect(() => {
     let ignore = false;
     async function load() {
-      if (!photoKey) {
-        setAvatarUrl(null);
-        return;
-      }
       try {
-        const res = await fetch("/api/s3/presign-get", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ key: photoKey }),
-        });
-        const data = await res.json();
-        if (!ignore && res.ok && data?.url) setAvatarUrl(data.url);
-      } catch {
-        setAvatarUrl(null);
+        // Obtener datos actuales del usuario para reflejar cambios sin re-login
+        const me = await fetch("/api/users/me");
+        if (me.ok) {
+          const { user } = await me.json();
+          if (!ignore) {
+            const fullName = `${user?.nombre ?? ""} ${user?.apellidos ?? ""}`.trim();
+            setDisplayName(fullName || user?.email || name || null);
+            const userPhotoKey = user?.photoKey ?? null;
+            setCurrentPhotoKey(userPhotoKey);
+            // Cargar avatar
+            await loadAvatar(userPhotoKey);
+          }
+        } else {
+          // fallback a props o sesión
+          const sessionPhotoKey = (session as any)?.photoKey ?? null;
+          const fallbackPhotoKey = photoKey ?? sessionPhotoKey;
+          setDisplayName(name ?? session?.user?.name ?? null);
+          setCurrentPhotoKey(fallbackPhotoKey);
+          await loadAvatar(fallbackPhotoKey);
+        }
+      } catch (error) {
+        console.error("Error loading user data:", error);
+        // Fallback a props o sesión
+        const sessionPhotoKey = (session as any)?.photoKey ?? null;
+        const fallbackPhotoKey = photoKey ?? sessionPhotoKey;
+        setCurrentPhotoKey(fallbackPhotoKey);
+        await loadAvatar(fallbackPhotoKey);
       }
     }
     load();
     return () => {
       ignore = true;
     };
-  }, [photoKey]);
+  }, [session, photoKey, name]);
+
+  // Escucha un evento global para refrescar avatar/nombre tras editar perfil
+  useEffect(() => {
+    const onUpdated = async () => {
+      try {
+        const me = await fetch("/api/users/me");
+        if (me.ok) {
+          const { user } = await me.json();
+          const fullName = `${user?.nombre ?? ""} ${user?.apellidos ?? ""}`.trim();
+          setDisplayName(fullName || user?.email || null);
+          const userPhotoKey = user?.photoKey ?? null;
+          setCurrentPhotoKey(userPhotoKey);
+          await loadAvatar(userPhotoKey);
+          // Actualizar la sesión también
+          if (update) {
+            await update({
+              name: fullName || user?.email || name || undefined,
+              photoKey: userPhotoKey,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error updating profile:", error);
+      }
+    };
+    window.addEventListener("profile-updated", onUpdated);
+    return () => window.removeEventListener("profile-updated", onUpdated);
+  }, [update, name]);
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -49,7 +123,7 @@ export default function UserMenu({ name, photoKey }: Props) {
     return () => document.removeEventListener("click", onClick);
   }, [open]);
 
-  const initials = (name || "")
+  const initials = (displayName || name || "")
     .split(" ")
     .filter(Boolean)
     .slice(0, 2)
@@ -73,7 +147,7 @@ export default function UserMenu({ name, photoKey }: Props) {
         <div className="hidden md:flex flex-col items-start leading-tight">
           <span className="text-sm text-[#2d2d2d]">Hola,</span>
           <span className="text-sm font-semibold text-[#2d2d2d] truncate max-w-[120px]">
-            {(name || "").split(" ")[0] || "Usuario"}
+            {(displayName || name || "").split(" ")[0] || "Usuario"}
           </span>
         </div>
         <svg className={`w-4 h-4 text-[#2d2d2d] transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 20 20" fill="currentColor">
