@@ -13,12 +13,13 @@ export default function Hero() {
       id="inicio"
       className="min-h-screen flex items-center justify-center pt-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
     >
-      {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#e8e0f0] via-[#f5f3f8] to-[#d4c4e8] opacity-50"></div>
-      
-      {/* Decorative Circles */}
-      <div className="absolute top-20 right-10 w-64 h-64 bg-[#a8d5ba] rounded-full opacity-20 blur-3xl"></div>
-      <div className="absolute bottom-20 left-10 w-64 h-64 bg-[#c4a8d5] rounded-full opacity-20 blur-3xl"></div>
+      {/* Soft gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#e8e0f0] via-[#f5f3f8] to-[#d4c4e8]"></div>
+
+      {/* Animated blobs for a calming feel */}
+      <div className="pointer-events-none absolute -top-10 -right-10 w-72 h-72 bg-[#a8d5ba] opacity-30 blur-3xl animate-blob"></div>
+      <div className="pointer-events-none absolute -bottom-10 -left-10 w-80 h-80 bg-[#c4a8d5] opacity-30 blur-3xl animate-blob" style={{ animationDelay: '4s' }}></div>
+      <div className="pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 w-96 h-96 bg-[#4a9a8a] opacity-20 blur-3xl animate-blob" style={{ animationDelay: '8s' }}></div>
 
       <div className="container mx-auto max-w-6xl relative z-10">
         <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -26,7 +27,7 @@ export default function Hero() {
           <div className="text-center md:text-left space-y-6">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#2d2d2d] leading-tight">
               Bienestar Emocional
-              <span className="block bg-gradient-to-r from-[#4a9a8a] via-[#a8d5ba] to-[#c4a8d5] bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-[#4a9a8a] via-[#a8d5ba] to-[#c4a8d5] bg-clip-text text-transparent animate-pulse-soft">
                 Creciendo Juntos
               </span>
             </h1>
@@ -58,7 +59,7 @@ export default function Hero() {
           <div className="flex justify-center md:justify-end">
             <div className="relative w-full max-w-md">
               <div className="absolute inset-0 bg-gradient-to-br from-[#a8d5ba] to-[#c4a8d5] rounded-3xl transform rotate-6 opacity-20"></div>
-              <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border-2 border-[#e8e0f0]">
+              <div className="relative glass-card rounded-3xl p-8 shadow-2xl animate-float-slow">
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-3 h-3 rounded-full bg-[#a8d5ba]"></div>

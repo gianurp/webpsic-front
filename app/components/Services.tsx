@@ -1,3 +1,5 @@
+import Reveal from "./Reveal";
+
 export default function Services() {
   const services = [
     {
@@ -45,19 +47,22 @@ export default function Services() {
     >
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-[#2d2d2d] mb-4">
-            Mis <span className="text-[#4a9a8a]">Servicios</span>
-          </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-[#a8d5ba] via-[#c4a8d5] to-[#4a9a8a] mx-auto mb-4"></div>
-          <p className="text-lg text-[#555] max-w-2xl mx-auto">
-            Ofrezco una variedad de servicios terapéuticos adaptados a tus necesidades
-          </p>
+          <Reveal>
+            <h2 className="text-4xl sm:text-5xl font-bold text-[#2d2d2d] mb-4">
+              Mis <span className="text-[#4a9a8a]">Servicios</span>
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-[#a8d5ba] via-[#c4a8d5] to-[#4a9a8a] mx-auto mb-4"></div>
+            <p className="text-lg text-[#555] max-w-2xl mx-auto">
+              Ofrezco una variedad de servicios terapéuticos adaptados a tus necesidades
+            </p>
+          </Reveal>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, index) => (
-            <div
+            <Reveal
               key={index}
+              delayMs={index * 100}
               className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-2 border-transparent hover:border-[#e8e0f0]"
             >
               <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${service.color} flex items-center justify-center text-3xl mb-6`}>
@@ -69,7 +74,7 @@ export default function Services() {
               <p className="text-[#555] leading-relaxed">
                 {service.description}
               </p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>

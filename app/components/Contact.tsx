@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from "react";
+import Reveal from "./Reveal";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -31,18 +32,20 @@ export default function Contact() {
     >
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-[#2d2d2d] mb-4">
-            Contáctame
-          </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-[#a8d5ba] via-[#c4a8d5] to-[#4a9a8a] mx-auto mb-4"></div>
-          <p className="text-lg text-[#555] max-w-2xl mx-auto">
-            Estoy aquí para ayudarte. Agenda tu consulta o envíame un mensaje
-          </p>
+          <Reveal>
+            <h2 className="text-4xl sm:text-5xl font-bold text-[#2d2d2d] mb-4">
+              Contáctame
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-[#a8d5ba] via-[#c4a8d5] to-[#4a9a8a] mx-auto mb-4"></div>
+            <p className="text-lg text-[#555] max-w-2xl mx-auto">
+              Estoy aquí para ayudarte. Agenda tu consulta o envíame un mensaje
+            </p>
+          </Reveal>
         </div>
 
         <div className="grid md:grid-cols-2 gap-12">
           {/* Contact Information */}
-          <div className="space-y-8">
+          <Reveal className="space-y-8">
             <div>
               <h3 className="text-2xl font-bold text-[#2d2d2d] mb-6">
                 Información de Contacto
@@ -90,10 +93,10 @@ export default function Contact() {
                 </div>
               </div>
             </div>
-          </div>
+          </Reveal>
 
           {/* Contact Form */}
-          <div>
+          <Reveal>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-[#2d2d2d] mb-2">
@@ -165,7 +168,7 @@ export default function Contact() {
                 Enviar Mensaje
               </button>
             </form>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

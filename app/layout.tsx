@@ -3,6 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "./components/Header";
 import ScrollHandler from "./components/ScrollHandler";
+import FloatingButtons from "./components/FloatingButtons";
+import CalmWaves from "./components/CalmWaves";
+import CalmBackdrop from "./components/CalmBackdrop";
+import RouteTransition from "./components/RouteTransition";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,9 +36,14 @@ export default function RootLayout({
       >
         <Header />
         <ScrollHandler />
-        <main className="pt-20">
-          {children}
+        <CalmBackdrop />
+        <main className="pt-20 relative z-10">
+          <RouteTransition>
+            {children}
+          </RouteTransition>
         </main>
+        <CalmWaves />
+        <FloatingButtons />
       </body>
     </html>
   );

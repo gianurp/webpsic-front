@@ -1,3 +1,5 @@
+import Reveal from "./Reveal";
+
 export default function Testimonials() {
   const testimonials = [
     {
@@ -24,19 +26,22 @@ export default function Testimonials() {
     >
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-[#2d2d2d] mb-4">
-            Testimonios
-          </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-[#a8d5ba] via-[#c4a8d5] to-[#4a9a8a] mx-auto mb-4"></div>
-          <p className="text-lg text-[#555] max-w-2xl mx-auto">
-            Lo que dicen las personas que han trabajado conmigo
-          </p>
+          <Reveal>
+            <h2 className="text-4xl sm:text-5xl font-bold text-[#2d2d2d] mb-4">
+              Testimonios
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-[#a8d5ba] via-[#c4a8d5] to-[#4a9a8a] mx-auto mb-4"></div>
+            <p className="text-lg text-[#555] max-w-2xl mx-auto">
+              Lo que dicen las personas que han trabajado conmigo
+            </p>
+          </Reveal>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <div
+            <Reveal
               key={index}
+              delayMs={index * 120}
               className="bg-gradient-to-br from-[#f5f3f8] to-white rounded-2xl p-8 shadow-lg border-2 border-[#e8e0f0]"
             >
               <div className="flex mb-4">
@@ -62,7 +67,7 @@ export default function Testimonials() {
                   {testimonial.name}
                 </span>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>

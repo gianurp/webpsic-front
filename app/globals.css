@@ -37,3 +37,74 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* Peaceful motion utilities */
+@keyframes floatSlow {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulseSoft {
+  0%, 100% { opacity: 0.65; }
+  50% { opacity: 0.9; }
+}
+
+@keyframes blobMorph {
+  0% { border-radius: 42% 58% 66% 34% / 42% 39% 61% 58%; }
+  33% { border-radius: 58% 42% 28% 72% / 48% 62% 38% 52%; }
+  66% { border-radius: 32% 68% 70% 30% / 54% 34% 66% 46%; }
+  100% { border-radius: 42% 58% 66% 34% / 42% 39% 61% 58%; }
+}
+
+/* Utility classes */
+.animate-float-slow {
+  animation: floatSlow 7s ease-in-out infinite;
+}
+.animate-pulse-soft {
+  animation: pulseSoft 6s ease-in-out infinite;
+}
+.animate-blob {
+  animation: blobMorph 16s ease-in-out infinite;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-slow,
+  .animate-pulse-soft,
+  .animate-blob {
+    animation: none !important;
+  }
+}
+
+/* Glass effect card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 196, 232, 0.6);
+}
+
+/* Gentle sea waves */
+@keyframes waveSlide {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.waves-track {
+  width: 200%;
+  animation: waveSlide 30s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .waves-track {
+    animation: none !important;
+  }
+}
+
+/* Oculta botones flotantes si el menú está abierto */
+body.menu-open .floating-buttons {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+}

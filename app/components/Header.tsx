@@ -24,9 +24,24 @@ export default function Header() {
     setIsMobileMenuOpen(false);
   };
 
+  // Bloquear scroll del body cuando el menú móvil está abierto
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.classList.add('menu-open');
+    } else {
+      document.body.style.overflow = '';
+      document.body.classList.remove('menu-open');
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.classList.remove('menu-open');
+    };
+  }, [isMobileMenuOpen]);
+
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-[80] transition-all duration-300 ${
         isScrolled
           ? 'bg-white/95 backdrop-blur-md shadow-md'
           : 'bg-transparent'
@@ -61,16 +76,28 @@ export default function Header() {
               Inicio
             </Link>
             <Link
-              href="/#sobre-mi"
-              className="text-[#2d2d2d] hover:text-[#4a9a8a] transition-colors font-medium"
+              href="/sobre-mi"
+              className={`transition-colors font-medium ${
+                isActive('/sobre-mi') ? 'text-[#4a9a8a]' : 'text-[#2d2d2d] hover:text-[#4a9a8a]'
+              }`}
             >
               Sobre Mí
             </Link>
             <Link
-              href="/#servicios"
-              className="text-[#2d2d2d] hover:text-[#4a9a8a] transition-colors font-medium"
+              href="/servicios"
+              className={`transition-colors font-medium ${
+                isActive('/servicios') ? 'text-[#4a9a8a]' : 'text-[#2d2d2d] hover:text-[#4a9a8a]'
+              }`}
             >
               Servicios
+            </Link>
+            <Link
+              href="/agenda"
+              className={`transition-colors font-medium ${
+                isActive('/agenda') ? 'text-[#4a9a8a]' : 'text-[#2d2d2d] hover:text-[#4a9a8a]'
+              }`}
+            >
+              Agenda
             </Link>
             <Link
               href="/experiencia"
@@ -83,13 +110,15 @@ export default function Header() {
               Experiencia
             </Link>
             <Link
-              href="/#testimonios"
-              className="text-[#2d2d2d] hover:text-[#4a9a8a] transition-colors font-medium"
+              href="/testimonios"
+              className={`transition-colors font-medium ${
+                isActive('/testimonios') ? 'text-[#4a9a8a]' : 'text-[#2d2d2d] hover:text-[#4a9a8a]'
+              }`}
             >
               Testimonios
             </Link>
             <Link
-              href="/#contacto"
+              href="/contacto"
               className="bg-gradient-to-r from-[#a8d5ba] via-[#c4a8d5] to-[#4a9a8a] text-white px-6 py-2 rounded-full font-medium hover:opacity-90 transition-opacity"
             >
               Contacto
@@ -130,9 +159,13 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Overlay y Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden py-4 space-y-4 bg-white/95 backdrop-blur-md rounded-lg mt-2 shadow-lg">
+          <div className="md:hidden fixed inset-0 z-[90] px-3 sm:px-6">
+            {/* overlay */}
+            <div className="absolute inset-0 bg-black/10" onClick={() => setIsMobileMenuOpen(false)}></div>
+            {/* panel */}
+            <div className="relative mt-24 mx-auto w-full max-w-lg py-4 pb-6 space-y-4 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-[#e8e0f0]">
             <Link
               href="/"
               onClick={handleLinkClick}
@@ -145,18 +178,31 @@ export default function Header() {
               Inicio
             </Link>
             <Link
-              href="/#sobre-mi"
+              href="/sobre-mi"
               onClick={handleLinkClick}
-              className="block w-full text-left px-4 py-2 text-[#2d2d2d] hover:text-[#4a9a8a] transition-colors"
+              className={`block w-full text-left px-4 py-2 transition-colors ${
+                isActive('/sobre-mi') ? 'text-[#4a9a8a]' : 'text-[#2d2d2d] hover:text-[#4a9a8a]'
+              }`}
             >
               Sobre Mí
             </Link>
             <Link
-              href="/#servicios"
+              href="/servicios"
               onClick={handleLinkClick}
-              className="block w-full text-left px-4 py-2 text-[#2d2d2d] hover:text-[#4a9a8a] transition-colors"
+              className={`block w-full text-left px-4 py-2 transition-colors ${
+                isActive('/servicios') ? 'text-[#4a9a8a]' : 'text-[#2d2d2d] hover:text-[#4a9a8a]'
+              }`}
             >
               Servicios
+            </Link>
+            <Link
+              href="/agenda"
+              onClick={handleLinkClick}
+              className={`block w-full text-left px-4 py-2 transition-colors ${
+                isActive('/agenda') ? 'text-[#4a9a8a]' : 'text-[#2d2d2d] hover:text-[#4a9a8a]'
+              }`}
+            >
+              Agenda
             </Link>
             <Link
               href="/experiencia"
@@ -170,16 +216,18 @@ export default function Header() {
               Experiencia
             </Link>
             <Link
-              href="/#testimonios"
+              href="/testimonios"
               onClick={handleLinkClick}
-              className="block w-full text-left px-4 py-2 text-[#2d2d2d] hover:text-[#4a9a8a] transition-colors"
+              className={`block w-full text-left px-4 py-2 transition-colors ${
+                isActive('/testimonios') ? 'text-[#4a9a8a]' : 'text-[#2d2d2d] hover:text-[#4a9a8a]'
+              }`}
             >
               Testimonios
             </Link>
             <Link
-              href="/#contacto"
+              href="/contacto"
               onClick={handleLinkClick}
-              className="block w-full text-left px-4 py-2 bg-gradient-to-r from-[#a8d5ba] via-[#c4a8d5] to-[#4a9a8a] text-white rounded-lg mx-4 font-medium"
+              className="block w-full text-left px-4 py-2 bg-gradient-to-r from-[#a8d5ba] via-[#c4a8d5] to-[#4a9a8a] text-white rounded-lg font-medium"
             >
               Contacto
             </Link>
@@ -194,6 +242,7 @@ export default function Header() {
             >
               Iniciar Sesión
             </Link>
+            </div>
           </div>
         )}
       </nav>

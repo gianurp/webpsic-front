@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Reveal from "./Reveal";
 
 export default function About() {
   return (
@@ -8,15 +9,17 @@ export default function About() {
     >
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-[#2d2d2d] mb-4">
-            Sobre <span className="text-[#4a9a8a]">Mí</span>
-          </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-[#a8d5ba] via-[#c4a8d5] to-[#4a9a8a] mx-auto"></div>
+          <Reveal>
+            <h2 className="text-4xl sm:text-5xl font-bold text-[#2d2d2d] mb-4">
+              Sobre <span className="text-[#4a9a8a]">Mí</span>
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-[#a8d5ba] via-[#c4a8d5] to-[#4a9a8a] mx-auto"></div>
+          </Reveal>
         </div>
 
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Image */}
-          <div className="flex justify-center">
+          <Reveal className="flex justify-center">
             <div className="relative w-full max-w-sm">
               <div className="absolute inset-0 bg-gradient-to-br from-[#a8d5ba] to-[#c4a8d5] rounded-3xl transform -rotate-6 opacity-30"></div>
               <div className="relative bg-gradient-to-br from-[#e8e0f0] to-[#d4c4e8] rounded-3xl p-8 shadow-xl">
@@ -31,10 +34,10 @@ export default function About() {
                 </div>
               </div>
             </div>
-          </div>
+          </Reveal>
 
           {/* Content */}
-          <div className="space-y-6">
+          <Reveal className="space-y-6" delayMs={150}>
             <h3 className="text-3xl font-bold text-[#2d2d2d]">
               Diana Campos Del Carpio
             </h3>
@@ -63,7 +66,7 @@ export default function About() {
                 </p>
               </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>
