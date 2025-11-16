@@ -7,6 +7,7 @@ import FloatingButtons from "./components/FloatingButtons";
 import CalmWaves from "./components/CalmWaves";
 import CalmBackdrop from "./components/CalmBackdrop";
 import RouteTransition from "./components/RouteTransition";
+import Providers from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,16 +35,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Header />
-        <ScrollHandler />
-        <CalmBackdrop />
-        <main className="pt-20 relative z-10">
-          <RouteTransition>
-            {children}
-          </RouteTransition>
-        </main>
-        <CalmWaves />
-        <FloatingButtons />
+        <Providers>
+          <Header />
+          <ScrollHandler />
+          <CalmBackdrop />
+          <main className="pt-20 relative z-10">
+            <RouteTransition>
+              {children}
+            </RouteTransition>
+          </main>
+          <CalmWaves />
+          <FloatingButtons />
+        </Providers>
       </body>
     </html>
   );

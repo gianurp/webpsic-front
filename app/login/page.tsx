@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import Footer from "../components/Footer";
+import { signIn } from "next-auth/react";
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -16,13 +17,18 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Aquí iría la lógica de autenticación
-    // Por ahora solo simulamos un delay
-    setTimeout(() => {
-      setIsLoading(false);
-      alert('Funcionalidad de login en desarrollo');
-    }, 1000);
+    const res = await signIn("credentials", {
+      email: formData.email,
+      password: formData.password,
+      redirect: false
+    });
+    setIsLoading(false);
+    if (res?.error) {
+      alert(res.error || "Credenciales inválidas");
+    } else {
+      // redirigir a inicio
+      window.location.href = "/";
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import Footer from "../components/Footer";
+// Usamos crypto.randomUUID() para evitar depender de la librería 'uuid'
 
 export default function Registro() {
   const [formData, setFormData] = useState({
@@ -18,6 +19,9 @@ export default function Registro() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [uploadedPhotoKey, setUploadedPhotoKey] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,13 +37,57 @@ export default function Registro() {
     }
 
     setIsLoading(true);
-    
-    // Aquí iría la lógica de registro
-    // Por ahora solo simulamos un delay
-    setTimeout(() => {
+
+    try {
+      // Subir foto primero si existe
+      let photoKey: string | undefined;
+      if (photoFile) {
+        const tempUser = crypto.randomUUID();
+        const key = `users/${tempUser}/photos/${crypto.randomUUID()}-${photoFile.name}`;
+        const presignRes = await fetch("/api/s3/presign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key, contentType: photoFile.type || "application/octet-stream" }),
+        });
+        if (!presignRes.ok) throw new Error("No se pudo obtener URL prefirmada");
+        const { url } = await presignRes.json();
+        const putRes = await fetch(url, {
+          method: "PUT",
+          headers: {
+            "Content-Type": photoFile.type || "application/octet-stream",
+            // Debe coincidir con el header firmado en el backend
+            "x-amz-server-side-encryption": "AES256",
+          },
+          body: photoFile,
+        });
+        if (!putRes.ok) throw new Error("Error subiendo archivo a S3");
+        photoKey = key;
+        setUploadedPhotoKey(key);
+      }
+
+      // Guardar usuario en DB
+      const saveRes = await fetch("/api/users/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: formData.nombre,
+          apellidos: formData.apellidos,
+          email: formData.email,
+          telefono: formData.telefono,
+          password: formData.password,
+          photoKey: photoKey || null,
+        }),
+      });
+      const saveJson = await saveRes.json();
+      if (!saveRes.ok) throw new Error(saveJson?.error || "Error registrando usuario");
+
       setIsLoading(false);
-      alert('Funcionalidad de registro en desarrollo');
-    }, 1000);
+      alert("Cuenta creada correctamente. Ya puedes iniciar sesión.");
+    } catch (err: any) {
+      console.error(err);
+      setIsLoading(false);
+      alert(err?.message || "Error en el registro");
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,6 +96,17 @@ export default function Registro() {
       ...formData,
       [name]: type === 'checkbox' ? checked : value,
     });
+  };
+
+  const onSelectPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPhotoFile(file);
+      setPhotoPreview(URL.createObjectURL(file));
+    } else {
+      setPhotoFile(null);
+      setPhotoPreview(null);
+    }
   };
 
   return (
@@ -76,6 +135,32 @@ export default function Registro() {
           {/* Registration Form */}
           <div className="bg-white rounded-3xl p-8 shadow-2xl border-2 border-[#e8e0f0]">
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Foto de perfil */}
+              <div>
+                <label className="block text-sm font-medium text-[#2d2d2d] mb-2">
+                  Foto de Perfil (opcional)
+                </label>
+                <div className="flex items-center gap-4">
+                  <div className="w-20 h-20 rounded-full bg-[#f5f3f8] overflow-hidden border border-[#e8e0f0] flex items-center justify-center">
+                    {photoPreview ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={photoPreview} alt="preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-xs text-[#777]">Vista</span>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={onSelectPhoto}
+                    className="block text-sm text-[#2d2d2d]"
+                  />
+                </div>
+                {uploadedPhotoKey && (
+                  <p className="text-xs text-[#4a9a8a] mt-2 break-all">Archivo subido: {uploadedPhotoKey}</p>
+                )}
+              </div>
+
               <div className="grid sm:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="nombre" className="block text-sm font-medium text-[#2d2d2d] mb-2">

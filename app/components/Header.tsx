@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import UserMenu from "./UserMenu";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -9,6 +11,7 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -123,16 +126,20 @@ export default function Header() {
             >
               Contacto
             </Link>
-            <Link
-              href="/login"
-              className={`transition-colors font-medium ${
-                isActive('/login')
-                  ? 'text-[#4a9a8a]'
-                  : 'text-[#2d2d2d] hover:text-[#4a9a8a]'
-              }`}
-            >
-              Iniciar Sesión
-            </Link>
+            {session ? (
+              <UserMenu name={session.user?.name} photoKey={(session as any).photoKey ?? null} />
+            ) : (
+              <Link
+                href="/login"
+                className={`transition-colors font-medium ${
+                  isActive('/login')
+                    ? 'text-[#4a9a8a]'
+                    : 'text-[#2d2d2d] hover:text-[#4a9a8a]'
+                }`}
+              >
+                Iniciar Sesión
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -231,17 +238,23 @@ export default function Header() {
             >
               Contacto
             </Link>
-            <Link
-              href="/login"
-              onClick={handleLinkClick}
-              className={`block w-full text-left px-4 py-2 transition-colors ${
-                isActive('/login')
-                  ? 'text-[#4a9a8a]'
-                  : 'text-[#2d2d2d] hover:text-[#4a9a8a]'
-              }`}
-            >
-              Iniciar Sesión
-            </Link>
+            {session ? (
+              <div className="px-4">
+                <UserMenu name={session.user?.name} photoKey={(session as any).photoKey ?? null} />
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                onClick={handleLinkClick}
+                className={`block w-full text-left px-4 py-2 transition-colors ${
+                  isActive('/login')
+                    ? 'text-[#4a9a8a]'
+                    : 'text-[#2d2d2d] hover:text-[#4a9a8a]'
+                }`}
+              >
+                Iniciar Sesión
+              </Link>
+            )}
             </div>
           </div>
         )}
