@@ -3,58 +3,41 @@
 import { useState, useRef, useEffect } from "react";
 import Modal from "../../components/Modal";
 
-interface User {
+interface Paciente {
   _id: string;
-  nombres: string;
+  nombre: string;
   apellidos: string;
   email: string;
-  nombreUsuario: string;
-  fechaNacimiento: string;
-  tipoDocumento: string;
-  numeroDocumento: string;
-  sexo: string;
-  direccion: string;
-  numeroCelular: string;
-  rol: string;
+  telefono: string;
   photoKey: string | null;
   activo?: boolean;
 }
 
-interface UserFormProps {
-  user: User | null;
+interface PacienteEditModalProps {
+  paciente: Paciente;
   onClose: () => void;
   currentUserId: string;
 }
 
-export default function UserForm({ user, onClose, currentUserId }: UserFormProps) {
+export default function PacienteEditModal({ paciente, onClose, currentUserId }: PacienteEditModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const isEditing = !!user;
-
   const [formData, setFormData] = useState({
-    nombres: user?.nombres || "",
-    apellidos: user?.apellidos || "",
-    email: user?.email || "",
-    password: "",
-    nombreUsuario: user?.nombreUsuario || "",
-    fechaNacimiento: user?.fechaNacimiento ? new Date(user.fechaNacimiento).toISOString().split("T")[0] : "",
-    tipoDocumento: user?.tipoDocumento || "DNI",
-    numeroDocumento: user?.numeroDocumento || "",
-    sexo: user?.sexo || "Otro",
-    direccion: user?.direccion || "",
-    numeroCelular: user?.numeroCelular || "",
-    rol: user?.rol || "psicologo",
+    nombre: paciente.nombre,
+    apellidos: paciente.apellidos,
+    email: paciente.email,
+    telefono: paciente.telefono,
   });
 
   useEffect(() => {
-    if (user?.photoKey) {
-      loadPhoto(user.photoKey);
+    if (paciente.photoKey) {
+      loadPhoto(paciente.photoKey);
     }
-  }, [user?.photoKey]);
+  }, [paciente.photoKey]);
 
   const loadPhoto = async (photoKey: string) => {
     try {
@@ -79,7 +62,12 @@ export default function UserForm({ user, onClose, currentUserId }: UserFormProps
         setError("La imagen debe ser menor a 5MB");
         return;
       }
+      if (!file.type.startsWith('image/')) {
+        setError("El archivo debe ser una imagen");
+        return;
+      }
       setSelectedFile(file);
+      setError(null);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPhotoPreview(reader.result as string);
@@ -94,22 +82,12 @@ export default function UserForm({ user, onClose, currentUserId }: UserFormProps
     setError(null);
 
     try {
-      // Validaciones
-      if (!formData.nombres || !formData.apellidos || !formData.email || !formData.nombreUsuario) {
-        throw new Error("Todos los campos requeridos deben estar completos");
-      }
-
-      if (!isEditing && !formData.password) {
-        throw new Error("La contraseña es requerida para nuevos usuarios");
-      }
-
-      let photoKey = user?.photoKey || null;
+      let photoKey = paciente.photoKey;
 
       // Subir nueva foto si hay una seleccionada
       if (selectedFile) {
-        const userId = user?._id || crypto.randomUUID();
         const fileExtension = selectedFile.name.split(".").pop();
-        const key = `usersWork/${userId}/photos/${crypto.randomUUID()}.${fileExtension}`;
+        const key = `users/${paciente._id}/photos/${crypto.randomUUID()}.${fileExtension}`;
 
         // Obtener URL presignada
         const presignRes = await fetch("/api/s3/presign", {
@@ -151,36 +129,27 @@ export default function UserForm({ user, onClose, currentUserId }: UserFormProps
         photoKey = key;
       }
 
-      const payload: any = {
-        ...formData,
-        photoKey,
-      };
-
-      if (!isEditing || formData.password) {
-        payload.password = formData.password;
-      }
-
-      const url = isEditing
-        ? `/api/syscreju/users/${user._id}`
-        : "/api/syscreju/users";
-      const method = isEditing ? "PUT" : "POST";
-
-      const res = await fetch(url, {
-        method,
+      // Actualizar paciente
+      const res = await fetch(`/api/syscreju/pacientes/${paciente._id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           "x-user-id": currentUserId,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ...formData,
+          photoKey,
+        }),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Error guardando usuario");
+        throw new Error(data.error || "Error actualizando paciente");
       }
 
       onClose();
     } catch (err: any) {
+      console.error("Error en handleSubmit:", err);
       setError(err.message || "Ocurrió un error inesperado.");
     } finally {
       setIsLoading(false);
@@ -189,9 +158,9 @@ export default function UserForm({ user, onClose, currentUserId }: UserFormProps
 
   return (
     <Modal
-      isOpen={true}
+      isOpen={!!paciente}
       onClose={onClose}
-      title={isEditing ? "Editar Usuario" : "Nuevo Usuario"}
+      title="Editar Paciente"
       size="lg"
       footer={
         <div className="flex gap-4 justify-end">
@@ -204,16 +173,16 @@ export default function UserForm({ user, onClose, currentUserId }: UserFormProps
           </button>
           <button
             type="submit"
-            form="user-form"
+            form="paciente-edit-form"
             disabled={isLoading}
             className="px-6 py-2 rounded-lg bg-gradient-to-r from-[#a8d5ba] via-[#c4a8d5] to-[#4a9a8a] text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? "Guardando..." : isEditing ? "Actualizar" : "Crear Usuario"}
+            {isLoading ? "Guardando..." : "Actualizar"}
           </button>
         </div>
       }
     >
-      <form id="user-form" onSubmit={handleSubmit} className="space-y-6">
+      <form id="paciente-edit-form" onSubmit={handleSubmit} className="space-y-6">
         {/* Foto de perfil */}
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
@@ -227,7 +196,7 @@ export default function UserForm({ user, onClose, currentUserId }: UserFormProps
                 />
               ) : (
                 <span className="text-3xl text-white font-bold">
-                  {formData.nombres.charAt(0) || "U"}
+                  {formData.nombre.charAt(0) || "P"}
                 </span>
               )}
             </div>
@@ -255,12 +224,12 @@ export default function UserForm({ user, onClose, currentUserId }: UserFormProps
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-[#2d2d2d] mb-2">
-              Nombres *
+              Nombre *
             </label>
             <input
               type="text"
-              value={formData.nombres}
-              onChange={(e) => setFormData({ ...formData, nombres: e.target.value })}
+              value={formData.nombre}
+              onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
               required
               className="w-full px-4 py-2 rounded-lg border-2 border-[#e8e0f0] focus:border-[#4a9a8a] focus:outline-none transition-colors"
             />
@@ -294,132 +263,16 @@ export default function UserForm({ user, onClose, currentUserId }: UserFormProps
           </div>
           <div>
             <label className="block text-sm font-medium text-[#2d2d2d] mb-2">
-              Nombre de Usuario *
-            </label>
-            <input
-              type="text"
-              value={formData.nombreUsuario}
-              onChange={(e) => setFormData({ ...formData, nombreUsuario: e.target.value })}
-              required
-              className="w-full px-4 py-2 rounded-lg border-2 border-[#e8e0f0] focus:border-[#4a9a8a] focus:outline-none transition-colors"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-[#2d2d2d] mb-2">
-            Contraseña {isEditing ? "(dejar vacío para no cambiar)" : "*"}
-          </label>
-          <input
-            type="password"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            required={!isEditing}
-            className="w-full px-4 py-2 rounded-lg border-2 border-[#e8e0f0] focus:border-[#4a9a8a] focus:outline-none transition-colors"
-          />
-        </div>
-
-        {/* Información adicional */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-[#2d2d2d] mb-2">
-              Fecha de Nacimiento *
-            </label>
-            <input
-              type="date"
-              value={formData.fechaNacimiento}
-              onChange={(e) => setFormData({ ...formData, fechaNacimiento: e.target.value })}
-              required
-              className="w-full px-4 py-2 rounded-lg border-2 border-[#e8e0f0] focus:border-[#4a9a8a] focus:outline-none transition-colors"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#2d2d2d] mb-2">
-              Tipo de Documento *
-            </label>
-            <select
-              value={formData.tipoDocumento}
-              onChange={(e) => setFormData({ ...formData, tipoDocumento: e.target.value })}
-              required
-              className="w-full px-4 py-2 rounded-lg border-2 border-[#e8e0f0] focus:border-[#4a9a8a] focus:outline-none transition-colors"
-            >
-              <option value="DNI">DNI</option>
-              <option value="CE">CE</option>
-              <option value="Pasaporte">Pasaporte</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-[#2d2d2d] mb-2">
-              Número de Documento *
-            </label>
-            <input
-              type="text"
-              value={formData.numeroDocumento}
-              onChange={(e) => setFormData({ ...formData, numeroDocumento: e.target.value })}
-              required
-              className="w-full px-4 py-2 rounded-lg border-2 border-[#e8e0f0] focus:border-[#4a9a8a] focus:outline-none transition-colors"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#2d2d2d] mb-2">
-              Sexo *
-            </label>
-            <select
-              value={formData.sexo}
-              onChange={(e) => setFormData({ ...formData, sexo: e.target.value })}
-              required
-              className="w-full px-4 py-2 rounded-lg border-2 border-[#e8e0f0] focus:border-[#4a9a8a] focus:outline-none transition-colors"
-            >
-              <option value="Masculino">Masculino</option>
-              <option value="Femenino">Femenino</option>
-              <option value="Otro">Otro</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-[#2d2d2d] mb-2">
-              Número de Celular *
+              Teléfono *
             </label>
             <input
               type="tel"
-              value={formData.numeroCelular}
-              onChange={(e) => setFormData({ ...formData, numeroCelular: e.target.value })}
+              value={formData.telefono}
+              onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
               required
               className="w-full px-4 py-2 rounded-lg border-2 border-[#e8e0f0] focus:border-[#4a9a8a] focus:outline-none transition-colors"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-[#2d2d2d] mb-2">
-              Rol *
-            </label>
-            <select
-              value={formData.rol}
-              onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
-              required
-              className="w-full px-4 py-2 rounded-lg border-2 border-[#e8e0f0] focus:border-[#4a9a8a] focus:outline-none transition-colors"
-            >
-              <option value="admin">Admin</option>
-              <option value="psicologo">Psicólogo</option>
-              <option value="secretaria">Secretaria</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-[#2d2d2d] mb-2">
-            Dirección
-          </label>
-          <input
-            type="text"
-            value={formData.direccion}
-            onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
-            className="w-full px-4 py-2 rounded-lg border-2 border-[#e8e0f0] focus:border-[#4a9a8a] focus:outline-none transition-colors"
-          />
         </div>
 
         {error && (

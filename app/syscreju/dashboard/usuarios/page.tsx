@@ -179,26 +179,25 @@ export default function UsuariosPage() {
         <p className="text-[#555] mt-1">Administra los usuarios del sistema (admin, psicólogos, etc.)</p>
       </header>
 
-      {showForm ? (
+      <UserList
+        users={users}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onToggleActive={handleToggleActive}
+        onView={handleView}
+      />
+      
+      {showForm && (
         <UserForm
           user={editingUser}
           onClose={handleFormClose}
           currentUserId={currentUserId || ""}
         />
-      ) : (
-        <>
-          <UserList
-            users={users}
-            onCreate={handleCreate}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onToggleActive={handleToggleActive}
-            onView={handleView}
-          />
-          {viewingUser && (
-            <UserDetailsModal user={viewingUser} onClose={handleCloseView} />
-          )}
-        </>
+      )}
+      
+      {viewingUser && (
+        <UserDetailsModal user={viewingUser} onClose={handleCloseView} />
       )}
     </div>
   );
