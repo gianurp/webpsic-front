@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { getDb } from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
 import { ObjectId } from "mongodb";
 
 // Actualizar usuario
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const adminId = req.headers.get("x-user-id");
@@ -32,7 +32,7 @@ export async function PUT(
       );
     }
 
-    const userId = params.id;
+    const { id: userId } = await params;
     const body = await req.json();
     const {
       nombres,
@@ -146,8 +146,8 @@ export async function PUT(
 
 // Eliminar o desactivar usuario
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const adminId = req.headers.get("x-user-id");
@@ -173,7 +173,7 @@ export async function DELETE(
       );
     }
 
-    const userId = params.id;
+    const { id: userId } = await params;
 
     // No permitir que un admin se elimine a sí mismo
     if (adminId === userId) {

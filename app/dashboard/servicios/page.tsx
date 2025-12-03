@@ -99,7 +99,7 @@ export default async function ServiciosPage() {
             </div>
 
             {/* Barra de progreso para servicios con sesiones limitadas */}
-            {typeof servicio.sesionesRestantes === "number" && (
+            {typeof servicio.sesionesRestantes === "number" && typeof servicio.sesionesTotales === "number" && (
               <div className="mt-4">
                 <div className="flex justify-between text-xs text-[#777] mb-1">
                   <span>Progreso</span>

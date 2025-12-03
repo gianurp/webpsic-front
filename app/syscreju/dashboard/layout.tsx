@@ -57,7 +57,8 @@ export default function SysCrejuDashboardLayout({ children }: DashboardLayoutPro
 
   // Escuchar evento de actualización de perfil
   useEffect(() => {
-    const handleProfileUpdate = async (event: CustomEvent) => {
+    const handleProfileUpdate = async (evt: Event) => {
+      const event = evt as CustomEvent<any>;
       const updatedUser = event.detail?.user;
       if (updatedUser) {
         setUser(updatedUser);
@@ -86,9 +87,9 @@ export default function SysCrejuDashboardLayout({ children }: DashboardLayoutPro
       }
     };
 
-    window.addEventListener("syscreju-profile-updated", handleProfileUpdate as EventListener);
+    window.addEventListener("syscreju-profile-updated", handleProfileUpdate);
     return () => {
-      window.removeEventListener("syscreju-profile-updated", handleProfileUpdate as EventListener);
+      window.removeEventListener("syscreju-profile-updated", handleProfileUpdate);
     };
   }, [loadAvatar]);
 

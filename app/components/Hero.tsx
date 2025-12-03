@@ -11,7 +11,7 @@ export default function Hero() {
   return (
     <section
       id="inicio"
-      className="min-h-screen flex items-center justify-center pt-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
+      className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative overflow-hidden"
     >
       {/* Soft gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#e8e0f0] via-[#f5f3f8] to-[#d4c4e8]"></div>

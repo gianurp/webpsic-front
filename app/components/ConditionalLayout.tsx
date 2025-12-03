@@ -23,7 +23,7 @@ export default function ConditionalLayout({ children }: { children: React.ReactN
       <Header />
       <ScrollHandler />
       <CalmBackdrop />
-      <main className="pt-20 relative z-10">
+      <main className="pt-28 sm:pt-32 relative z-10">
         <RouteTransition>
           {children}
         </RouteTransition>

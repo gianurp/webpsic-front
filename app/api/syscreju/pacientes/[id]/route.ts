@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { getDb } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
 // Obtener detalles de un paciente
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const adminId = req.headers.get("x-user-id");
@@ -31,7 +31,7 @@ export async function GET(
       );
     }
 
-    const pacienteId = params.id;
+    const { id: pacienteId } = await params;
     const paciente = await db.collection("users").findOne(
       { _id: new ObjectId(pacienteId) },
       { projection: { passwordHash: 0 } }
@@ -61,8 +61,8 @@ export async function GET(
 
 // Actualizar paciente
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const adminId = req.headers.get("x-user-id");
@@ -88,7 +88,7 @@ export async function PUT(
       );
     }
 
-    const pacienteId = params.id;
+    const { id: pacienteId } = await params;
     const body = await req.json();
     const {
       nombre,
@@ -159,8 +159,8 @@ export async function PUT(
 
 // Desactivar paciente
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const adminId = req.headers.get("x-user-id");
@@ -186,7 +186,7 @@ export async function DELETE(
       );
     }
 
-    const pacienteId = params.id;
+    const { id: pacienteId } = await params;
 
     // En lugar de eliminar, desactivar el paciente
     const result = await db.collection("users").updateOne(
